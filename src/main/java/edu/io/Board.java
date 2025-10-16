@@ -3,7 +3,7 @@ package edu.io;
 public class Board {
     public int size;
     public Token[][] grid;
-    private static final String EMPTY_SQUARE = "・";
+    private static final String EMPTY_TOKEN_LABEL = "・";
 
     public Board() {
         this(10); // domyślny rozmiar
@@ -13,12 +13,13 @@ public class Board {
         if (size <= 0) throw new IllegalArgumentException("Size must be > 0");
         this.size = size;
         this.grid = new Token[size][size];
+        clean(); // inicjalizacja planszy
     }
 
     public void clean() {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                grid[i][j] = new Token(EMPTY_SQUARE);
+                grid[i][j] = new Token(EMPTY_TOKEN_LABEL);
             }
         }
     }
@@ -41,6 +42,7 @@ public class Board {
             System.out.println();
         }
     }
+
     private void checkBounds(int x, int y) {
         if (x < 0 || x >= size || y < 0 || y >= size) {
             throw new IllegalArgumentException(
