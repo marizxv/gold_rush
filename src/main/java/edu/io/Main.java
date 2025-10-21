@@ -1,5 +1,7 @@
 package edu.io;
 
+import edu.io.token.Token;
+
 public class Main {
     public static void main(String[] args) {
         Board board = new Board(5);

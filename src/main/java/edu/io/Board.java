@@ -1,9 +1,11 @@
 package edu.io;
 
+import edu.io.token.EmptyToken;
+import edu.io.token.Token;
+
 public class Board {
     public int size;
     public Token[][] grid;
-    private static final String EMPTY_TOKEN_LABEL = "・";
 
     public Board() {
         this(10); // domyślny rozmiar
@@ -17,36 +19,43 @@ public class Board {
     }
 
     public void clean() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                grid[i][j] = new Token(EMPTY_TOKEN_LABEL);
+        EmptyToken emptyToken = new EmptyToken();
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                grid[row][col] = emptyToken;
             }
         }
     }
 
-    public void placeToken(int x, int y, Token token) {
-        checkBounds(x, y);
-        grid[y][x] = token;
+    public int size() {
+        return size;
     }
 
-    public Token square(int x, int y) {
-        checkBounds(x, y);
-        return grid[y][x];
+    public Token placeToken(int row, int col, Token token) {
+        checkBounds(row, col);
+        return grid[row][col];
+    }
+
+    public Token peekToken(int col, int row) {
+        checkBounds(col, row);
+        return grid[row][col];
     }
 
     public void display() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(grid[i][j].label + " ");
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                System.out.print(grid[row][col].label() + " ");
             }
             System.out.println();
         }
     }
 
-    private void checkBounds(int x, int y) {
-        if (x < 0 || x >= size || y < 0 || y >= size) {
+    private void checkBounds(int col, int row) {
+        if (col < 0 || col >= size || row < 0 || row >= size) {
             throw new IllegalArgumentException(
-                    String.format("Coordinates out of bounds: (%d,%d) for size %d", x, y, size));
+                    String.format("Coordinates out of bounds: (%d,%d) for size %d", col, row, size));
         }
     }
+
+    public record Coords(int col, int row) {}
 }
