@@ -2,6 +2,6 @@ package edu.io.token;
 
 public class GoldToken extends Token {
     public GoldToken() {
-        super(Label.EMPTY_TOKEN_LABEL);
+        super(Label.GOLD_TOKEN_LABEL);
     }
 }

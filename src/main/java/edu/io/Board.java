@@ -4,8 +4,8 @@ import edu.io.token.EmptyToken;
 import edu.io.token.Token;
 
 public class Board {
-    public int size;
-    public Token[][] grid;
+    private int size;
+    private Token[][] grid;
 
     public Board() {
         this(10); // domyślny rozmiar
@@ -31,9 +31,9 @@ public class Board {
         return size;
     }
 
-    public Token placeToken(int row, int col, Token token) {
-        checkBounds(row, col);
-        return grid[row][col];
+    public void placeToken(int col, int row, Token token) {
+        checkBounds(col, row);
+        grid[row][col] = token;
     }
 
     public Token peekToken(int col, int row) {
