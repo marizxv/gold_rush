@@ -1,23 +1,23 @@
 package edu.io.token;
 
 import edu.io.Board;
+import edu.io.Player;
 
 public class PlayerToken extends Token {
     public enum Move {UP, DOWN, LEFT, RIGHT, NONE}
 
     private final Board board;
+    private final Player player;
     private int col;
     private int row;
 
-    public PlayerToken(Board board) {
-        this(board, 0, 0);
-    }
-
-    public PlayerToken(Board board, int col, int row) {
+    public PlayerToken(Player player, Board board) {
         super(Label.PLAYER_TOKEN_LABEL);
         this.board = board;
-        this.col = col;
-        this.row = row;
+        this.player = player;
+        Board.Coords coords = board.getAvailableSquare();
+        this.col = coords.col();
+        this.row = coords.row();
         board.placeToken(col, row, this);
     }
 
@@ -46,6 +46,10 @@ public class PlayerToken extends Token {
         if (newCol < 0 || newCol >= board.size() || newRow < 0 || newRow >= board.size()) {
             throw new IllegalArgumentException("Cannot move outside the board");
         }
+
+        // interakcja z tokenem na nowym polu
+        Token tokenOnNewSquare = board.peekToken(newCol, newRow);
+        player.interactWithToken(tokenOnNewSquare);
 
         // Zapis starej pozycji
         int oldCol = col;

@@ -57,5 +57,16 @@ public class Board {
         }
     }
 
+    public Board.Coords getAvailableSquare() {
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                if (grid[row][col] instanceof EmptyToken) {
+                    return new Board.Coords(col, row);
+                }
+            }
+        }
+        throw new IllegalStateException("Board is full");
+    }
+
     public record Coords(int col, int row) {}
 }
