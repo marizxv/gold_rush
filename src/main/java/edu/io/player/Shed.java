@@ -11,6 +11,9 @@ public class Shed {
     }
 
     public void add(Tool tool) {
+        if (tool == null) {
+            throw new IllegalArgumentException("Tool cannot be null");
+        }
         tools.push(tool);
     }
 

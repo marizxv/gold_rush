@@ -4,13 +4,14 @@ public class PickaxeToken extends Token implements Tool, Repairable {
     private final double gainFactor;
     private int durability;
     private final int initialDurability;
+    private boolean wasUsedInLastOperation = false;
 
     public PickaxeToken() {
-        this(1.5, 10);
+        this(1.5, 3);
     }
 
     public PickaxeToken(double gainFactor) {
-        this(gainFactor, 10);
+        this(gainFactor, 3);
     }
 
     public PickaxeToken(double gainFactor, int durability) {
@@ -52,15 +53,18 @@ public class PickaxeToken extends Token implements Tool, Repairable {
 
     @Override
     public Tool useWith(Token withToken) {
+        wasUsedInLastOperation = false;
+
         if (withToken instanceof GoldToken && !isBroken()) {
             use();
+            wasUsedInLastOperation = true;
         }
         return this;
     }
 
     @Override
     public Tool ifWorking(Runnable action) {
-        if (!isBroken()) {
+        if (wasUsedInLastOperation && !isBroken()) {
             action.run();
         }
         return this;
@@ -76,6 +80,9 @@ public class PickaxeToken extends Token implements Tool, Repairable {
 
     @Override
     public Tool ifIdle(Runnable action) {
+        if (!wasUsedInLastOperation && !isBroken()) {
+            action.run();
+        }
         return this;
     }
 }
