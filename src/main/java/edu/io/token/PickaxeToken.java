@@ -3,17 +3,27 @@ package edu.io.token;
 public class PickaxeToken extends Token implements Tool, Repairable {
     private final double gainFactor;
     private int durability;
-    private final int maxDurability;
+    private final int initialDurability;
 
     public PickaxeToken() {
-        this(1.5, 5);
+        this(1.5, 10);
+    }
+
+    public PickaxeToken(double gainFactor) {
+        this(gainFactor, 10);
     }
 
     public PickaxeToken(double gainFactor, int durability) {
         super(Label.PICKAXE_TOKEN_LABEL);
+        if (gainFactor <= 0) {
+            throw new IllegalArgumentException("Gain factor must be positive");
+        }
+        if (durability <= 0) {
+            throw new IllegalArgumentException("Durability must be positive");
+        }
         this.gainFactor = gainFactor;
         this.durability = durability;
-        this.maxDurability = durability;
+        this.initialDurability = durability;
     }
 
     public double gainFactor() {
@@ -32,7 +42,7 @@ public class PickaxeToken extends Token implements Tool, Repairable {
 
     @Override
     public void repair() {
-        durability = maxDurability;
+        durability = initialDurability;
     }
 
     @Override
@@ -42,6 +52,9 @@ public class PickaxeToken extends Token implements Tool, Repairable {
 
     @Override
     public Tool useWith(Token withToken) {
+        if (withToken instanceof GoldToken && !isBroken()) {
+            use();
+        }
         return this;
     }
 
@@ -63,7 +76,6 @@ public class PickaxeToken extends Token implements Tool, Repairable {
 
     @Override
     public Tool ifIdle(Runnable action) {
-        action.run();
         return this;
     }
 }

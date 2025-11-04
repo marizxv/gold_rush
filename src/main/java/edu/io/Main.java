@@ -25,6 +25,7 @@ public class Main {
         System.out.println("Plansza początkowa:");
         board.display();
 
-        System.out.println("\nZłoto gracza: " + player.gold() + " uncji");
+        System.out.println("\nZłoto gracza: " + player.gold.amount() + " uncji");
+        System.out.println("Czy szopka pusta? " + player.shed().isEmpty());
     }
 }

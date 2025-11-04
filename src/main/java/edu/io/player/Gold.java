@@ -6,6 +6,9 @@ public class Gold {
     public Gold() {}
 
     public Gold(double amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
         this.amount = amount;
     }
 

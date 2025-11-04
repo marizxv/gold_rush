@@ -1,7 +1,6 @@
 package edu.io.player;
 
 import edu.io.token.Tool;
-import edu.io.token.NoTool;
 import java.util.Stack;
 
 public class Shed {

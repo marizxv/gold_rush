@@ -57,11 +57,11 @@ public class Board {
         }
     }
 
-    public Board.Coords getAvailableSquare() {
+    public Coords getAvailableSquare() {
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
                 if (grid[row][col] instanceof EmptyToken) {
-                    return new Board.Coords(col, row);
+                    return new Coords(col, row);
                 }
             }
         }
