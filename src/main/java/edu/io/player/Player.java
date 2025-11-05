@@ -21,7 +21,7 @@ public class Player {
 
     public void interactWithToken(Token token) {
         switch (token) {
-            case GoldToken goldToken -> useToolOnGold(goldToken);
+            case GoldToken goldToken -> usePickaxeOnGold(goldToken);
             case PickaxeToken pickaxeToken -> shed.add(pickaxeToken);
             case AnvilToken anvilToken -> {
                 Tool tool = shed.getTool();
@@ -33,17 +33,28 @@ public class Player {
         }
     }
 
-    private void useToolOnGold(GoldToken goldToken) {
+    private void usePickaxeOnGold(GoldToken goldToken) {
         Tool tool = shed.getTool();
         double amount = goldToken.amount();
 
-        tool.useWith(goldToken)
-                .ifWorking(() -> gold.gain(amount * getGainFactor(tool)))
-                .ifBroken(() -> {
-                    gold.gain(amount);
-                    shed.dropTool();
-                })
-                .ifIdle(() -> gold.gain(amount));
+        if (tool instanceof PickaxeToken pickaxe) {
+            pickaxe.useWith(goldToken)
+                    .ifWorking(() -> gold.gain(amount * pickaxe.gainFactor()))
+                    .ifBroken(() -> {
+                        gold.gain(amount);
+                        shed.dropTool();
+                    })
+                    .ifIdle(() -> gold.gain(amount));
+        } else {
+            // standardowe zbieranie (dla innych narzędzi lub braku narzędzia)
+            tool.useWith(goldToken)
+                    .ifWorking(() -> gold.gain(amount * getGainFactor(tool)))
+                    .ifBroken(() -> {
+                        gold.gain(amount);
+                        shed.dropTool();
+                    })
+                    .ifIdle(() -> gold.gain(amount));
+        }
     }
 
     private double getGainFactor(Tool tool) {
