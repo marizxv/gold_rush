@@ -2,6 +2,7 @@ package edu.io;
 
 import edu.io.token.EmptyToken;
 import edu.io.token.Token;
+import java.util.Objects;
 
 public class Board {
     private int size;
@@ -33,6 +34,7 @@ public class Board {
 
     public void placeToken(int col, int row, Token token) {
         checkBounds(col, row);
+        Objects.requireNonNull(token, "Token cannot be null");
         grid[row][col] = token;
     }
 

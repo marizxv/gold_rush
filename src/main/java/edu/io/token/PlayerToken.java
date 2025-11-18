@@ -1,8 +1,8 @@
 package edu.io.token;
 
 import edu.io.Board;
-import edu.io.player.VitalsValues;
 import edu.io.player.Player;
+import java.util.Objects;
 
 public class PlayerToken extends Token {
     public enum Move {UP, DOWN, LEFT, RIGHT, NONE}
@@ -14,8 +14,8 @@ public class PlayerToken extends Token {
 
     public PlayerToken(Player player, Board board) {
         super(Label.PLAYER_TOKEN_LABEL);
-        this.board = board;
-        this.player = player;
+        this.board = Objects.requireNonNull(board, "Board cannot be null");
+        this.player = Objects.requireNonNull(player, "Player cannot be null");
         Board.Coords coords = board.getAvailableSquare();
         this.col = coords.col();
         this.row = coords.row();
@@ -23,12 +23,11 @@ public class PlayerToken extends Token {
     }
 
     public void move(Move direction) {
+        Objects.requireNonNull(direction, "Direction cannot be null");
+
         if (!player.vitals.isAlive()) {
             throw new IllegalStateException("Player is dead and cannot move");
         }
-
-        // Zużycie wody za ruch
-        player.vitals.dehydrate(VitalsValues.DEHYDRATION_MOVE);
 
         int newCol = col;
         int newRow = row;

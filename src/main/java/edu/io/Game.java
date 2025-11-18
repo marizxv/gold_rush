@@ -1,6 +1,7 @@
 package edu.io;
 import edu.io.player.Player;
 import edu.io.token.*;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Game {
@@ -8,7 +9,7 @@ public class Game {
     private Player player;
 
     public void join(Player player) {
-        this.player = player;
+        this.player = Objects.requireNonNull(player, "Player cannot be null");
         PlayerToken token = new PlayerToken(player, board);
         player.assignToken(token);
 

@@ -2,6 +2,7 @@ package edu.io.player;
 
 import edu.io.player.VitalsValues;
 import edu.io.token.*;
+import java.util.Objects;
 
 public class Player {
     private PlayerToken token;
@@ -10,7 +11,7 @@ public class Player {
     public final Vitals vitals = new Vitals();
 
     public void assignToken(PlayerToken token) {
-        this.token = token;
+        this.token = Objects.requireNonNull(token, "Token cannot be null");
     }
 
     public PlayerToken token() {
@@ -22,6 +23,8 @@ public class Player {
     }
 
     public void interactWithToken(Token token) {
+        Objects.requireNonNull(token, "Token cannot be null");
+
         if (!vitals.isAlive()) {
             throw new IllegalStateException("Player is dead");
         }
@@ -33,7 +36,7 @@ public class Player {
             }
             case PickaxeToken pickaxeToken -> {
                 shed.add(pickaxeToken);
-                vitals.dehydrate(VitalsValues.DEHYDRATION_PICKAXE);
+                // Nie zużywamy wody przy podnoszeniu kilofa - zgodnie z testami
             }
             case AnvilToken anvilToken -> {
                 Tool tool = shed.getTool();
@@ -45,7 +48,10 @@ public class Player {
             case WaterToken waterToken -> {
                 vitals.hydrate(waterToken.amount());
             }
-            default -> { }
+            default -> {
+                // Zużycie wody dla ruchu (EmptyToken i inne nieznane tokeny)
+                vitals.dehydrate(VitalsValues.DEHYDRATION_MOVE);
+            }
         }
     }
 
