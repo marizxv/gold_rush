@@ -11,30 +11,32 @@ public class Vitals {
     public Vitals(){
         this.hydration = 100;
         this.onDeathCallback = () -> {};
-    };
+    }
 
     public int hydration() {
         return hydration;
-    };
+    }
 
     public void hydrate(int amount){
-        if (hydration < 0)
-            throw new IllegalArgumentException("Hydration must be a positive number");
+        if (amount < 0)
+            throw new IllegalArgumentException("Amount cannot be negative");
         hydration = Math.min(hydration + amount, 100);
-    };
+    }
 
     public void dehydrate(int amount){
-        if (hydration < 0)
-            throw new IllegalArgumentException("Hydration must be a positive number");
-        hydration = Math.max(amount - hydration, 0);
+        if (amount < 0){
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
+        int newHydration = Math.max(hydration - amount, 0);
+        hydration = newHydration;
 
-        if (hydration <= 0)
+        if (newHydration == 0)
             onDeathCallback.run();
-    };
+    }
 
-    private boolean isAlive(){
+    public boolean isAlive(){
         return hydration > 0;
-    };
+    }
 
     public void setOnDeathHandler(@NotNull Runnable callback) {
         this.onDeathCallback = Objects.requireNonNull(callback, "callback cannot be null");

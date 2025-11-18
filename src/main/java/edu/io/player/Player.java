@@ -1,11 +1,13 @@
 package edu.io.player;
 
+import edu.io.player.VitalsValues;
 import edu.io.token.*;
 
 public class Player {
     private PlayerToken token;
     public final Gold gold = new Gold();
     private Shed shed = new Shed();
+    public final Vitals vitals = new Vitals();
 
     public void assignToken(PlayerToken token) {
         this.token = token;
@@ -20,14 +22,28 @@ public class Player {
     }
 
     public void interactWithToken(Token token) {
+        if (!vitals.isAlive()) {
+            throw new IllegalStateException("Player is dead");
+        }
+
         switch (token) {
-            case GoldToken goldToken -> usePickaxeOnGold(goldToken);
-            case PickaxeToken pickaxeToken -> shed.add(pickaxeToken);
+            case GoldToken goldToken -> {
+                usePickaxeOnGold(goldToken);
+                vitals.dehydrate(VitalsValues.DEHYDRATION_GOLD);
+            }
+            case PickaxeToken pickaxeToken -> {
+                shed.add(pickaxeToken);
+                vitals.dehydrate(VitalsValues.DEHYDRATION_PICKAXE);
+            }
             case AnvilToken anvilToken -> {
                 Tool tool = shed.getTool();
                 if (tool instanceof Repairable repairableTool) {
                     repairableTool.repair();
                 }
+                vitals.dehydrate(VitalsValues.DEHYDRATION_ANVIL);
+            }
+            case WaterToken waterToken -> {
+                vitals.hydrate(waterToken.amount());
             }
             default -> { }
         }
@@ -46,7 +62,6 @@ public class Player {
                     })
                     .ifIdle(() -> gold.gain(amount));
         } else {
-            // standardowe zbieranie (dla innych narzędzi lub braku narzędzia)
             tool.useWith(goldToken)
                     .ifWorking(() -> gold.gain(amount * getGainFactor(tool)))
                     .ifBroken(() -> {

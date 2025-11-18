@@ -1,6 +1,7 @@
 package edu.io.token;
 
 import edu.io.Board;
+import edu.io.player.VitalsValues;
 import edu.io.player.Player;
 
 public class PlayerToken extends Token {
@@ -22,6 +23,13 @@ public class PlayerToken extends Token {
     }
 
     public void move(Move direction) {
+        if (!player.vitals.isAlive()) {
+            throw new IllegalStateException("Player is dead and cannot move");
+        }
+
+        // Zużycie wody za ruch
+        player.vitals.dehydrate(VitalsValues.DEHYDRATION_MOVE);
+
         int newCol = col;
         int newRow = row;
 
@@ -42,27 +50,20 @@ public class PlayerToken extends Token {
                 return;
         }
 
-        // Sprawdzanie granic przed aktualizacją pozycji
         if (newCol < 0 || newCol >= board.size() || newRow < 0 || newRow >= board.size()) {
             throw new IllegalArgumentException("Cannot move outside the board");
         }
 
-        // interakcja z tokenem na nowym polu
         Token tokenOnNewSquare = board.peekToken(newCol, newRow);
         player.interactWithToken(tokenOnNewSquare);
 
-        // Zapis starej pozycji
         int oldCol = col;
         int oldRow = row;
 
-        // Aktualizacja pozycji
         col = newCol;
         row = newRow;
 
-        // Umieszczenie tokena na nowej pozycji
         board.placeToken(col, row, this);
-
-        // Na starej pozycji umieszczenie EmptyToken
         board.placeToken(oldCol, oldRow, new EmptyToken());
     }
 
@@ -70,4 +71,3 @@ public class PlayerToken extends Token {
         return new Board.Coords(col, row);
     }
 }
-
