@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "edu.io"
+group = "edu.io.net"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -10,9 +10,11 @@ repositories {
 }
 
 dependencies {
+    implementation(fileTree("libs"))
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    implementation("org.jetbrains:annotations:24.0.1") // Dodana zależność
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {
