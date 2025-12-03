@@ -3,6 +3,10 @@ package edu.io.net;
 import edu.io.net.command.*;
 import java.util.Scanner;
 
+import static edu.io.net.command.Handshake.CmdRe.Status.*;
+import static edu.io.net.command.Handshake.CmdRe.Status.OK;
+import static edu.io.net.command.JoinGame.CmdRe.Status.*;
+
 public class Main {
     public static void main(String[] args) {
         System.out.println("=== Gold Rush Client ===");
@@ -21,10 +25,11 @@ public class Main {
         gsc.issueCommand(new Handshake.Cmd("1.1.19"), res -> {
             if (res instanceof Handshake.CmdRe cmdRe) {
                 System.out.println("Handshake: " + cmdRe.status());
-                if (cmdRe.status() == Handshake.CmdRe.Status.OK) {
-                    System.out.println("Handshake udany!");
-                } else {
-                    System.out.println("Handshake nieudany: " + cmdRe.msg);
+                switch (cmdRe.status()) {
+                    case OK -> System.out.println("Handshake udany!");
+                    case LIB_VERSION_TOO_LOW -> System.out.println("Wersja biblioteki zbyt niska");
+                    case LIB_VERSION_MALFORMED -> System.out.println("Błędny format wersji");
+                    default -> System.out.println("Nieznany status");
                 }
             }
         });
@@ -38,29 +43,32 @@ public class Main {
         gsc.issueCommand(new JoinGame.Cmd(name), res -> {
             if (res instanceof JoinGame.CmdRe cmdRe) {
                 System.out.println("JoinGame: " + cmdRe.status());
-                if (cmdRe.status() == JoinGame.CmdRe.Status.OK) {
-                    System.out.println("Dołączono do gry! ID: " + cmdRe.clientId());
-                } else {
-                    System.out.println("Nie udało się dołączyć: " + cmdRe.msg);
+                switch (cmdRe.status()) {
+                    case OK -> System.out.println("Dołączono! ID: " + cmdRe.clientId);
+                    case NAME_ALREADY_EXISTS -> System.out.println("Nazwa zajęta");
+                    case ALREADY_CONNECTED -> System.out.println("Już połączony");
+                    default -> System.out.println("Nieznany status");
                 }
             }
         });
 
-        // handler dla poleceń od serwera
+        // odbieranie poleceń z serwera
         gsc.onCmdFromServer(cmd -> {
-            System.out.println("\n[Otrzymano z serwera] " + cmd.getClass().getSimpleName());
+            System.out.println("\n[Serwer] " + cmd.getClass().getSimpleName());
 
-            if (cmd instanceof Echo.CmdRe echo) {
-                System.out.println("Echo: " + echo.msg);
-            }
-            else if (cmd instanceof UpdateState.Cmd update) {
-                System.out.println("UpdateState - elementów: " + update.stateInfoList.size());
-                for (var state : update.stateInfoList) {
-                    handleGameState(state);
+            switch (cmd) {
+                case Echo.CmdRe echo -> System.out.println("Echo: " + echo.msg);
+
+                case UpdateState.Cmd update -> {
+                    System.out.println("UpdateState – elementów: " + update.stateInfoList.size());
+                    update.stateInfoList.forEach(Main::handleGameState);
                 }
-            }
-            else if (cmd instanceof CommandAck ack) {
-                System.out.println("Potwierdzenie: " + ack.reqCmd().getClass().getSimpleName());
+
+                case CommandAck ack -> System.out.println("Potwierdzenie: " + ack.reqCmd().getClass().getSimpleName());
+
+                case GetInfo.CmdRe gi -> System.out.println("GetInfo: " + gi.info);
+
+                default -> System.out.println("Nieznany typ komendy");
             }
         });
 
@@ -72,26 +80,34 @@ public class Main {
         System.out.println("Rozłączono.");
     }
 
+
+    // pomocnicza obsługa UpdateState
     private static void handleGameState(GameState state) {
-        if (state instanceof GameState.BoardInfo board) {
-            System.out.println("  Plansza: rozmiar " + board.size());
-        }
-        else if (state instanceof GameState.BoardSquareInfo square) {
-            System.out.println("  Pole [" + square.pos().col() + "," + square.pos().row() + "]: " + square.label());
-        }
-        else if (state instanceof GameState.PlayerInfo player) {
-            System.out.println("  Gracz: " + player.name() +
-                    ", złoto: " + player.gold() +
-                    ", nawodnienie: " + player.hydration() + "%" +
-                    ", narzędzia: " + player.tools());
-        }
-        else if (state instanceof GameState.PlayerListInfo players) {
-            System.out.println("  Lista graczy (" + players.players().size() + "):");
-            for (int i = 0; i < players.players().size(); i++) {
-                var p = players.players().get(i);
-                System.out.println("    " + (i == players.activePlayerIdx() ? "→ " : "  ") +
-                        p.name() + " @ [" + p.pos().col() + "," + p.pos().row() + "]");
+        switch (state) {
+            case GameState.BoardInfo board ->
+                    System.out.println("  Plansza: rozmiar " + board.size());
+
+            case GameState.BoardSquareInfo square ->
+                    System.out.println("  Pole [" + square.pos().col() + "," + square.pos().row() + "]: " + square.label());
+
+            case GameState.PlayerInfo player ->
+                    System.out.println("  Gracz: " + player.name()
+                            + " | złoto: " + player.gold()
+                            + " | nawodnienie: " + player.hydration() + "%"
+                            + " | narzędzia: " + player.tools());
+
+            case GameState.PlayerListInfo list -> {
+                System.out.println("  Lista graczy (" + list.players().size() + "):");
+                for (int i = 0; i < list.players().size(); i++) {
+                    var p = list.players().get(i);
+                    var marker = (i == list.activePlayerIdx()) ? "→" : " ";
+                    System.out.println("    " + marker + " " + p.name()
+                            + " @ [" + p.pos().col() + "," + p.pos().row() + "]");
+                }
             }
+
+            default ->
+                    System.out.println("  Nieznany typ GameState: " + state.getClass().getSimpleName());
         }
     }
 }
