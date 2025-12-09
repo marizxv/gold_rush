@@ -4,7 +4,36 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4b00daab-1051-42a8-9340-0536144234af" name="Changes" comment="-Now with ALL the new libraries (hopefully);&#10;-Used CountDownLatch for smoother UI;&#10;-&quot;Works on my pc&quot;;&#10;&#10;i04w02" />
+    <list default="true" id="4b00daab-1051-42a8-9340-0536144234af" name="Changes" comment="Don't mind those 78 random files, please. I'll fix it, I swear.">
+      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14/checksums/checksums.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14/checksums/sha1-checksums.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apiguardian_apiguardian_api_1_1_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_annotations_24_0_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_junit_jupiter_junit_jupiter_5_10_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_junit_jupiter_junit_jupiter_api_5_10_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_junit_jupiter_junit_jupiter_engine_5_10_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_junit_jupiter_junit_jupiter_params_5_10_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_junit_platform_junit_platform_commons_1_10_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_junit_platform_junit_platform_engine_1_10_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_opentest4j_opentest4j_1_3_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/gold_rush.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/gold_rush.main.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/gold_rush.test.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game_server-1.1.19-all.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/game_common-1.1.17.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/game_connector_lib-1.1.17-javadoc.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/game_connector_lib-1.1.17-sources.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/game_connector_lib-1.1.17.jar" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,7 +52,7 @@
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="gold_rush" type="f1a62948:ProjectNode" />
+                <item name="gold_rush_client" type="f1a62948:ProjectNode" />
               </path>
             </expand>
             <select />
@@ -107,7 +136,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "project.propVCSSupport.Mappings",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -152,7 +181,8 @@
       <workItem from="1764514403455" duration="1384000" />
       <workItem from="1764683372578" duration="368000" />
       <workItem from="1764684589128" duration="3165000" />
-      <workItem from="1765293425601" duration="14144000" />
+      <workItem from="1765293425601" duration="15333000" />
+      <workItem from="1765316665040" duration="245000" />
     </task>
     <task id="LOCAL-00001" summary="General architecture">
       <option name="closed" value="true" />
@@ -250,7 +280,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765312610827</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Don't mind those 78 random files, please. I'll fix it, I swear.">
+      <option name="closed" value="true" />
+      <created>1765315746088</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1765315746088</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -280,6 +318,7 @@
     <MESSAGE value="- PickaxeToken fix" />
     <MESSAGE value="-Now with new libraries;&#10;-Changed switches to if-s where needed;&#10;-New handling of server commands;&#10;-*Should* show the board??;&#10;-Yet unchecked, because I have problems with server connection;" />
     <MESSAGE value="-Now with ALL the new libraries (hopefully);&#10;-Used CountDownLatch for smoother UI;&#10;-&quot;Works on my pc&quot;;&#10;&#10;i04w02" />
-    <option name="LAST_COMMIT_MESSAGE" value="-Now with ALL the new libraries (hopefully);&#10;-Used CountDownLatch for smoother UI;&#10;-&quot;Works on my pc&quot;;&#10;&#10;i04w02" />
+    <MESSAGE value="Don't mind those 78 random files, please. I'll fix it, I swear." />
+    <option name="LAST_COMMIT_MESSAGE" value="Don't mind those 78 random files, please. I'll fix it, I swear." />
   </component>
 </project>
