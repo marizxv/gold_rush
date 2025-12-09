@@ -1,0 +1,17 @@
+Index: src/main/java/edu/io/player/Vitals.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package edu.io.player;\r\n\r\nimport org.jetbrains.annotations.NotNull;\r\n\r\nimport java.util.Objects;\r\n\r\npublic class Vitals {\r\n    private int hydration;\r\n    private Runnable onDeathCallback;\r\n\r\n    public Vitals(){\r\n        this.hydration = 100;\r\n        this.onDeathCallback = () -> {};\r\n    }\r\n\r\n    public int hydration() {\r\n        return hydration;\r\n    }\r\n\r\n    public void hydrate(int amount){\r\n        if (amount < 0)\r\n            throw new IllegalArgumentException(\"Amount cannot be negative\");\r\n        hydration = Math.min(hydration + amount, 100);\r\n    }\r\n\r\n    public void dehydrate(int amount){\r\n        if (amount < 0){\r\n            throw new IllegalArgumentException(\"Amount cannot be negative\");\r\n        }\r\n        int newHydration = Math.max(hydration - amount, 0);\r\n        hydration = newHydration;\r\n\r\n        if (newHydration == 0)\r\n            onDeathCallback.run();\r\n    }\r\n\r\n    public boolean isAlive(){\r\n        return hydration > 0;\r\n    }\r\n\r\n    public void setOnDeathHandler(@NotNull Runnable callback) {\r\n        this.onDeathCallback = Objects.requireNonNull(callback, \"callback cannot be null\");\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/edu/io/player/Vitals.java b/src/main/java/edu/io/player/Vitals.java
+--- a/src/main/java/edu/io/player/Vitals.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ b/src/main/java/edu/io/player/Vitals.java	(date 1764514505211)
+@@ -41,4 +41,4 @@
+     public void setOnDeathHandler(@NotNull Runnable callback) {
+         this.onDeathCallback = Objects.requireNonNull(callback, "callback cannot be null");
+     }
+-}
++}
+\ No newline at end of file

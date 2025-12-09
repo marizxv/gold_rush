@@ -1,0 +1,1946 @@
+Index: src/main/java/edu/io/token/PlayerToken.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/PlayerToken.java b/src/main/java/edu/io/token/PlayerToken.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/PlayerToken.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,72 +0,0 @@
+-package edu.io.token;
+-
+-import edu.io.Board;
+-import edu.io.player.Player;
+-import java.util.Objects;
+-
+-public class PlayerToken extends Token {
+-    public enum Move {UP, DOWN, LEFT, RIGHT, NONE}
+-
+-    private final Board board;
+-    private final Player player;
+-    private int col;
+-    private int row;
+-
+-    public PlayerToken(Player player, Board board) {
+-        super(Label.PLAYER_TOKEN_LABEL);
+-        this.board = Objects.requireNonNull(board, "Board cannot be null");
+-        this.player = Objects.requireNonNull(player, "Player cannot be null");
+-        Board.Coords coords = board.getAvailableSquare();
+-        this.col = coords.col();
+-        this.row = coords.row();
+-        board.placeToken(col, row, this);
+-    }
+-
+-    public void move(Move direction) {
+-        Objects.requireNonNull(direction, "Direction cannot be null");
+-
+-        if (!player.vitals.isAlive()) {
+-            throw new IllegalStateException("Player is dead and cannot move");
+-        }
+-
+-        int newCol = col;
+-        int newRow = row;
+-
+-        switch (direction) {
+-            case UP:
+-                newRow--;
+-                break;
+-            case DOWN:
+-                newRow++;
+-                break;
+-            case LEFT:
+-                newCol--;
+-                break;
+-            case RIGHT:
+-                newCol++;
+-                break;
+-            case NONE:
+-                return;
+-        }
+-
+-        if (newCol < 0 || newCol >= board.size() || newRow < 0 || newRow >= board.size()) {
+-            throw new IllegalArgumentException("Cannot move outside the board");
+-        }
+-
+-        Token tokenOnNewSquare = board.peekToken(newCol, newRow);
+-        player.interactWithToken(tokenOnNewSquare);
+-
+-        int oldCol = col;
+-        int oldRow = row;
+-
+-        col = newCol;
+-        row = newRow;
+-
+-        board.placeToken(col, row, this);
+-        board.placeToken(oldCol, oldRow, new EmptyToken());
+-    }
+-
+-    public Board.Coords pos(){
+-        return new Board.Coords(col, row);
+-    }
+-}
+\ No newline at end of file
+Index: src/test/java/WaterTest.java
+===================================================================
+diff --git a/src/test/java/WaterTest.java b/src/test/java/WaterTest.java
+deleted file mode 100644
+--- a/src/test/java/WaterTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,30 +0,0 @@
+-import edu.io.token.WaterToken;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-public class WaterTest {
+-
+-    private WaterToken waterToken;
+-
+-    @BeforeEach
+-    public void setUp() {
+-        waterToken = new WaterToken();
+-    }
+-
+-    @Test
+-    void default_water_token_amount_is_10() {
+-        Assertions.assertEquals(10, waterToken.amount());
+-    }
+-
+-    @Test
+-    void amount_can_be_in_range_0_100() {
+-        Assertions.assertEquals(21, new WaterToken(21).amount());
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> new WaterToken(-1));
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> new WaterToken(101));
+-    }
+-}
+Index: src/main/java/edu/io/token/Tool.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/Tool.java b/src/main/java/edu/io/token/Tool.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/Tool.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,9 +0,0 @@
+-package edu.io.token;
+-
+-public interface Tool {
+-    Tool useWith(Token withToken);
+-    Tool ifWorking(Runnable action);
+-    Tool ifBroken(Runnable action);
+-    Tool ifIdle(Runnable action);
+-    boolean isBroken();
+-}
+\ No newline at end of file
+Index: src/test/java/AnvilTest.java
+===================================================================
+diff --git a/src/test/java/AnvilTest.java b/src/test/java/AnvilTest.java
+deleted file mode 100644
+--- a/src/test/java/AnvilTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,23 +0,0 @@
+-import edu.io.player.Player;
+-import edu.io.token.AnvilToken;
+-import edu.io.token.GoldToken;
+-import edu.io.token.PickaxeToken;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.Test;
+-
+-public class AnvilTest {
+-
+-    @Test
+-    void anvil_repairs_pickaxe() {
+-        var DUR = 2;
+-        var player = new Player();
+-        var pickaxeToken = new PickaxeToken(1.5, DUR);
+-        player.interactWithToken(pickaxeToken);
+-
+-        pickaxeToken.useWith(new GoldToken()).ifWorking(() -> {});
+-        Assertions.assertEquals(DUR-1, pickaxeToken.durability());
+-
+-        player.interactWithToken(new AnvilToken());
+-        Assertions.assertEquals(DUR, pickaxeToken.durability());
+-    }
+-}
+Index: src/test/java/ShedTest.java
+===================================================================
+diff --git a/src/test/java/ShedTest.java b/src/test/java/ShedTest.java
+deleted file mode 100644
+--- a/src/test/java/ShedTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,43 +0,0 @@
+-import edu.io.player.NoTool;
+-import edu.io.player.Shed;
+-import edu.io.token.PickaxeToken;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-public class ShedTest {
+-
+-    private Shed shed;
+-
+-    @BeforeEach
+-    void setUp() {
+-        this.shed = new Shed();
+-    }
+-
+-    @Test
+-    void new_shed_is_empty() {
+-        Assertions.assertTrue(shed.isEmpty());
+-        Assertions.assertInstanceOf(NoTool.class, shed.getTool());
+-    }
+-
+-    @Test
+-    void can_add_tool() {
+-        var tool = new PickaxeToken();
+-        shed.add(tool);
+-        Assertions.assertEquals(tool, shed.getTool());
+-    }
+-
+-    @Test
+-    void throws_if_add_null() {
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> shed.add(null));
+-    }
+-
+-    @Test
+-    void can_drop_tool() {
+-        shed.add(new PickaxeToken());
+-        shed.dropTool();
+-        Assertions.assertInstanceOf(NoTool.class, shed.getTool());
+-    }
+-}
+Index: src/main/java/edu/io/player/Vitals.java
+===================================================================
+diff --git a/src/main/java/edu/io/player/Vitals.java b/src/main/java/edu/io/player/Vitals.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/player/Vitals.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,44 +0,0 @@
+-package edu.io.player;
+-
+-import org.jetbrains.annotations.NotNull;
+-
+-import java.util.Objects;
+-
+-public class Vitals {
+-    private int hydration;
+-    private Runnable onDeathCallback;
+-
+-    public Vitals(){
+-        this.hydration = 100;
+-        this.onDeathCallback = () -> {};
+-    }
+-
+-    public int hydration() {
+-        return hydration;
+-    }
+-
+-    public void hydrate(int amount){
+-        if (amount < 0)
+-            throw new IllegalArgumentException("Amount cannot be negative");
+-        hydration = Math.min(hydration + amount, 100);
+-    }
+-
+-    public void dehydrate(int amount){
+-        if (amount < 0){
+-            throw new IllegalArgumentException("Amount cannot be negative");
+-        }
+-        int newHydration = Math.max(hydration - amount, 0);
+-        hydration = newHydration;
+-
+-        if (newHydration == 0)
+-            onDeathCallback.run();
+-    }
+-
+-    public boolean isAlive(){
+-        return hydration > 0;
+-    }
+-
+-    public void setOnDeathHandler(@NotNull Runnable callback) {
+-        this.onDeathCallback = Objects.requireNonNull(callback, "callback cannot be null");
+-    }
+-}
+Index: src/main/java/edu/io/Main.java
+===================================================================
+diff --git a/src/main/java/edu/io/Main.java b/src/main/java/edu/io/Main.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/Main.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,17 +0,0 @@
+-package edu.io;
+-
+-import edu.io.player.Player;
+-
+-public class Main {
+-    public static void main(String[] args) {
+-        // Tworzenie gry i gracza
+-        Game game = new Game();
+-        Player player = new Player();
+-
+-        // Dołączenie gracza do gry
+-        game.join(player);
+-
+-        // Uruchomienie gry
+-        game.start();
+-    }
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/token/GoldToken.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/GoldToken.java b/src/main/java/edu/io/token/GoldToken.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/GoldToken.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,21 +0,0 @@
+-package edu.io.token;
+-
+-public class GoldToken extends Token {
+-    private final double amount;
+-
+-    public GoldToken() {
+-        this(1.0);
+-    }
+-
+-    public GoldToken(double amount) {
+-        super(Label.GOLD_TOKEN_LABEL);
+-        if (amount < 0) {
+-            throw new IllegalArgumentException("Amount cannot be negative");
+-        }
+-        this.amount = amount;
+-    }
+-
+-    public double amount() {
+-        return amount;
+-    }
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/Game.java
+===================================================================
+diff --git a/src/main/java/edu/io/Game.java b/src/main/java/edu/io/Game.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/Game.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,101 +0,0 @@
+-package edu.io;
+-import edu.io.player.Player;
+-import edu.io.token.*;
+-import java.util.Objects;
+-import java.util.Scanner;
+-
+-public class Game {
+-    private Board board;
+-    private Player player;
+-
+-    public void join(Player player) {
+-        this.player = Objects.requireNonNull(player, "Player cannot be null");
+-        PlayerToken token = new PlayerToken(player, board);
+-        player.assignToken(token);
+-
+-        // ustawienie handlera na śmierć gracza
+-        player.vitals.setOnDeathHandler(() -> {
+-            System.out.println("To koniec: pełne odwodnienie. Gra się kończy!");
+-        });
+-    }
+-
+-    public Game() {
+-        this.board = new Board(5);
+-        this.player = new Player();
+-        setupGame();
+-    }
+-
+-
+-    public void start() {
+-        System.out.println("=== GOLD RUSH ===");
+-        System.out.println("Gra się rozpoczęła!");
+-        board.display();
+-
+-        Scanner scanner = new Scanner(System.in);
+-        boolean gameRunning = true;
+-
+-        while (gameRunning && player.vitals.isAlive()) {
+-            System.out.println("\n--- Stan gracza ---");
+-            System.out.println("Złoto: " + player.gold.amount() + " uncji");
+-            System.out.println("Nawodnienie: " + player.vitals.hydration() + "%");
+-            System.out.println("Czy szopka pusta? " + player.shed().isEmpty());
+-
+-            System.out.println("\nDostępne komendy:");
+-            System.out.println("góra, dół, lewo, prawo - ruch");
+-            System.out.println("koniec - zakończ grę");
+-            System.out.print("Twój wybór: ");
+-
+-            String input = scanner.nextLine().trim().toLowerCase();
+-
+-            switch (input) {
+-                case "góra", "gora", "up" -> executeMove(PlayerToken.Move.UP);
+-                case "dół", "dol", "down" -> executeMove(PlayerToken.Move.DOWN);
+-                case "lewo", "left" -> executeMove(PlayerToken.Move.LEFT);
+-                case "prawo", "right" -> executeMove(PlayerToken.Move.RIGHT);
+-                case "koniec", "exit" -> {
+-                    System.out.println("Koniec gry!");
+-                    gameRunning = false;
+-                }
+-                default -> System.out.println("Nieznana komenda: " + input);
+-            }
+-
+-            if (player.vitals.hydration() < 30) {
+-                System.out.println("⚠  Uwaga: Niskie nawodnienie! Szukaj wody!");
+-            }
+-        }
+-
+-        if (!player.vitals.isAlive()) {
+-            System.out.println("\n Gracz nie żyje z powodu odwodnienia!");
+-        }
+-
+-        System.out.println("\n=== KONIEC GRY ===");
+-        System.out.println("Końcowy stan złota: " + player.gold.amount() + " uncji");
+-        scanner.close();
+-    }
+-
+-    private void executeMove(PlayerToken.Move move) {
+-        try {
+-            player.token().move(move);
+-            board.display();
+-        } catch (IllegalArgumentException e) {
+-            System.out.println("Nie można wykonać ruchu: " + e.getMessage());
+-        } catch (IllegalStateException e) {
+-            System.out.println("Nie można wykonać ruchu: " + e.getMessage());
+-        }
+-    }
+-
+-    private void setupGame() {
+-        // umieszczenie różnych tokenów na planszy
+-        board.placeToken(1, 2, new GoldToken(2.0));
+-        board.placeToken(2, 2, new PickaxeToken());
+-        board.placeToken(3, 2, new AnvilToken());
+-        board.placeToken(4, 2, new WaterToken());
+-        board.placeToken(0, 3, new GoldToken(1.5));
+-        board.placeToken(4, 4, new WaterToken(50)); // Duża butelka wody
+-    }
+-
+-    // uzyskanie planszy
+-    public Board getBoard() {
+-        return board;
+-    }
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/player/VitalsValues.java
+===================================================================
+diff --git a/src/main/java/edu/io/player/VitalsValues.java b/src/main/java/edu/io/player/VitalsValues.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/player/VitalsValues.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,8 +0,0 @@
+-package edu.io.player;
+-
+-public class VitalsValues {
+-    public static final int DEHYDRATION_MOVE = 1;
+-    public static final int DEHYDRATION_GOLD = 2;
+-    public static final int DEHYDRATION_ANVIL = 3;
+-    public static final int DEHYDRATION_PICKAXE = 2;
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/token/PyriteToken.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/PyriteToken.java b/src/main/java/edu/io/token/PyriteToken.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/PyriteToken.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,7 +0,0 @@
+-package edu.io.token;
+-
+-public class PyriteToken extends GoldToken {
+-    public PyriteToken() {
+-        super(0.0);
+-    }
+-}
+\ No newline at end of file
+Index: src/test/java/BoardTest.java
+===================================================================
+diff --git a/src/test/java/BoardTest.java b/src/test/java/BoardTest.java
+deleted file mode 100644
+--- a/src/test/java/BoardTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,90 +0,0 @@
+-import edu.io.Board;
+-import edu.io.player.Player;
+-import edu.io.token.*;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-class BoardTest {
+-    Board board;
+-    Player player;
+-
+-    @BeforeEach
+-    void setUp() {
+-        board = new Board();
+-        player = new Player();
+-    }
+-
+-    @Test
+-    void new_board_is_clean() {
+-        Assertions.assertTrue(_is_board_clean());
+-    }
+-
+-    @Test
+-    void can_place_token() {
+-        Token t = new PlayerToken(player, board);
+-        board.placeToken(1, 2, t);
+-        Assertions.assertEquals(t, board.peekToken(1, 2));
+-    }
+-
+-    @Test
+-    void clean_method_works() {
+-        board.placeToken(1, 2, new GoldToken());
+-        board.placeToken(board.size()-1, board.size()-1,
+-                new GoldToken());
+-        board.clean();
+-        Assertions.assertTrue(_is_board_clean());
+-    }
+-
+-    @Test
+-    void display_method_exists() {
+-        Assertions.assertDoesNotThrow(() -> Board.class.getMethod("display"));
+-    }
+-
+-    @Test
+-    void getAvailableSquare_returns_position_of_empty_square() {
+-        Board.Coords c = board.getAvailableSquare();
+-        Assertions.assertInstanceOf(
+-                EmptyToken.class,
+-                board.peekToken(c.col(), c.row()));
+-        board.placeToken(c.col(), c.row(), new GoldToken());
+-        c = board.getAvailableSquare();
+-        Assertions.assertInstanceOf(
+-                EmptyToken.class,
+-                board.peekToken(c.col(), c.row())
+-        );
+-    }
+-
+-    @Test
+-    void getAvailableSquare_throws_when_board_is_full() {
+-        int n = board.size() * board.size();
+-        Token token = new GoldToken();
+-        for (int i=0; i<n; i++) {
+-            Board.Coords c = board.getAvailableSquare();
+-            board.placeToken(c.col(), c.row(), token);
+-        }
+-        Assertions.assertThrows(
+-                IllegalStateException.class,
+-                () -> board.getAvailableSquare());
+-    }
+-
+-    @Test
+-    void throws_on_null_in_placeToken() {
+-        Assertions.assertThrows(
+-                NullPointerException.class,
+-                () -> board.placeToken(1, 1, null));
+-    }
+-
+-    // -- utils
+-    boolean _is_board_clean() {
+-        int size = board.size();
+-        for (int row = 0; row < size; row++) {
+-            for (int col = 0; col < size; col++) {
+-                if (!(board.peekToken(col, row) instanceof EmptyToken)) {
+-                    return false;
+-                }
+-            }
+-        }
+-        return true;
+-    }
+-}
+Index: src/main/java/edu/io/token/EmptyToken.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/EmptyToken.java b/src/main/java/edu/io/token/EmptyToken.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/EmptyToken.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,7 +0,0 @@
+-package edu.io.token;
+-
+-public class EmptyToken extends Token {
+-    public EmptyToken() {
+-        super(Label.EMPTY_TOKEN_LABEL);
+-    }
+-}
+Index: .idea/.gitignore
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+deleted file mode 100644
+--- a/.idea/.gitignore	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,8 +0,0 @@
+-# Default ignored files
+-/shelf/
+-/workspace.xml
+-# Editor-based HTTP Client requests
+-/httpRequests/
+-# Datasource local storage ignored files
+-/dataSources/
+-/dataSources.local.xml
+Index: src/main/java/edu/io/token/Repairable.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/Repairable.java b/src/main/java/edu/io/token/Repairable.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/Repairable.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,5 +0,0 @@
+-package edu.io.token;
+-
+-public interface Repairable {
+-    void repair();
+-}
+\ No newline at end of file
+Index: .idea/gradle.xml
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+deleted file mode 100644
+--- a/.idea/gradle.xml	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,16 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="GradleMigrationSettings" migrationVersion="1" />
+-  <component name="GradleSettings">
+-    <option name="linkedExternalProjectsSettings">
+-      <GradleProjectSettings>
+-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+-        <option name="modules">
+-          <set>
+-            <option value="$PROJECT_DIR$" />
+-          </set>
+-        </option>
+-      </GradleProjectSettings>
+-    </option>
+-  </component>
+-</project>
+\ No newline at end of file
+Index: .idea/vcs.xml
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+deleted file mode 100644
+--- a/.idea/vcs.xml	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="VcsDirectoryMappings">
+-    <mapping directory="" vcs="Git" />
+-  </component>
+-</project>
+\ No newline at end of file
+Index: src/main/java/edu/io/Board.java
+===================================================================
+diff --git a/src/main/java/edu/io/Board.java b/src/main/java/edu/io/Board.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/Board.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,74 +0,0 @@
+-package edu.io;
+-
+-import edu.io.token.EmptyToken;
+-import edu.io.token.Token;
+-import java.util.Objects;
+-
+-public class Board {
+-    private int size;
+-    private Token[][] grid;
+-
+-    public Board() {
+-        this(10); // domyślny rozmiar
+-    }
+-
+-    public Board(int size) {
+-        if (size <= 0) throw new IllegalArgumentException("Size must be > 0");
+-        this.size = size;
+-        this.grid = new Token[size][size];
+-        clean(); // inicjalizacja planszy
+-    }
+-
+-    public void clean() {
+-        EmptyToken emptyToken = new EmptyToken();
+-        for (int row = 0; row < size; row++) {
+-            for (int col = 0; col < size; col++) {
+-                grid[row][col] = emptyToken;
+-            }
+-        }
+-    }
+-
+-    public int size() {
+-        return size;
+-    }
+-
+-    public void placeToken(int col, int row, Token token) {
+-        checkBounds(col, row);
+-        Objects.requireNonNull(token, "Token cannot be null");
+-        grid[row][col] = token;
+-    }
+-
+-    public Token peekToken(int col, int row) {
+-        checkBounds(col, row);
+-        return grid[row][col];
+-    }
+-
+-    public void display() {
+-        for (int row = 0; row < size; row++) {
+-            for (int col = 0; col < size; col++) {
+-                System.out.print(grid[row][col].label() + " ");
+-            }
+-            System.out.println();
+-        }
+-    }
+-
+-    private void checkBounds(int col, int row) {
+-        if (col < 0 || col >= size || row < 0 || row >= size) {
+-            throw new IllegalArgumentException(
+-                    String.format("Coordinates out of bounds: (%d,%d) for size %d", col, row, size));
+-        }
+-    }
+-
+-    public Coords getAvailableSquare() {
+-        for (int row = 0; row < size; row++) {
+-            for (int col = 0; col < size; col++) {
+-                if (grid[row][col] instanceof EmptyToken) {
+-                    return new Coords(col, row);
+-                }
+-            }
+-        }
+-        throw new IllegalStateException("Board is full");
+-    }
+-
+-    public record Coords(int col, int row) {}
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/player/Shed.java
+===================================================================
+diff --git a/src/main/java/edu/io/player/Shed.java b/src/main/java/edu/io/player/Shed.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/player/Shed.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,32 +0,0 @@
+-package edu.io.player;
+-
+-import edu.io.token.Tool;
+-import java.util.Stack;
+-
+-public class Shed {
+-    private Stack<Tool> tools = new Stack<>();
+-
+-    public boolean isEmpty() {
+-        return tools.isEmpty();
+-    }
+-
+-    public void add(Tool tool) {
+-        if (tool == null) {
+-            throw new IllegalArgumentException("Tool cannot be null");
+-        }
+-        tools.push(tool);
+-    }
+-
+-    public Tool getTool() {
+-        if (tools.isEmpty()) {
+-            return NoTool.getInstance();
+-        }
+-        return tools.peek();
+-    }
+-
+-    public void dropTool() {
+-        if (!tools.isEmpty()) {
+-            tools.pop();
+-        }
+-    }
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/player/Player.java
+===================================================================
+diff --git a/src/main/java/edu/io/player/Player.java b/src/main/java/edu/io/player/Player.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/player/Player.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,87 +0,0 @@
+-package edu.io.player;
+-
+-import edu.io.player.VitalsValues;
+-import edu.io.token.*;
+-import java.util.Objects;
+-
+-public class Player {
+-    private PlayerToken token;
+-    public final Gold gold = new Gold();
+-    private Shed shed = new Shed();
+-    public final Vitals vitals = new Vitals();
+-
+-    public void assignToken(PlayerToken token) {
+-        this.token = Objects.requireNonNull(token, "Token cannot be null");
+-    }
+-
+-    public PlayerToken token() {
+-        return token;
+-    }
+-
+-    public Shed shed() {
+-        return shed;
+-    }
+-
+-    public void interactWithToken(Token token) {
+-        Objects.requireNonNull(token, "Token cannot be null");
+-
+-        if (!vitals.isAlive()) {
+-            throw new IllegalStateException("Player is dead");
+-        }
+-
+-        switch (token) {
+-            case GoldToken goldToken -> {
+-                usePickaxeOnGold(goldToken);
+-                vitals.dehydrate(VitalsValues.DEHYDRATION_GOLD);
+-            }
+-            case PickaxeToken pickaxeToken -> {
+-                shed.add(pickaxeToken);
+-                // Nie zużywamy wody przy podnoszeniu kilofa - zgodnie z testami
+-            }
+-            case AnvilToken anvilToken -> {
+-                Tool tool = shed.getTool();
+-                if (tool instanceof Repairable repairableTool) {
+-                    repairableTool.repair();
+-                }
+-                vitals.dehydrate(VitalsValues.DEHYDRATION_ANVIL);
+-            }
+-            case WaterToken waterToken -> {
+-                vitals.hydrate(waterToken.amount());
+-            }
+-            default -> {
+-                // Zużycie wody dla ruchu (EmptyToken i inne nieznane tokeny)
+-                vitals.dehydrate(VitalsValues.DEHYDRATION_MOVE);
+-            }
+-        }
+-    }
+-
+-    private void usePickaxeOnGold(GoldToken goldToken) {
+-        Tool tool = shed.getTool();
+-        double amount = goldToken.amount();
+-
+-        if (tool instanceof PickaxeToken pickaxe) {
+-            pickaxe.useWith(goldToken)
+-                    .ifWorking(() -> gold.gain(amount * pickaxe.gainFactor()))
+-                    .ifBroken(() -> {
+-                        gold.gain(amount);
+-                        shed.dropTool();
+-                    })
+-                    .ifIdle(() -> gold.gain(amount));
+-        } else {
+-            tool.useWith(goldToken)
+-                    .ifWorking(() -> gold.gain(amount * getGainFactor(tool)))
+-                    .ifBroken(() -> {
+-                        gold.gain(amount);
+-                        shed.dropTool();
+-                    })
+-                    .ifIdle(() -> gold.gain(amount));
+-        }
+-    }
+-
+-    private double getGainFactor(Tool tool) {
+-        if (tool instanceof PickaxeToken pickaxe) {
+-            return pickaxe.gainFactor();
+-        }
+-        return 1.0;
+-    }
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/token/Token.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/Token.java b/src/main/java/edu/io/token/Token.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/Token.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,12 +0,0 @@
+-package edu.io.token;
+-
+-public abstract class Token {
+-    private final String label;
+-
+-    public Token(String label) {
+-        this.label = label;
+-    }
+-    public String label() {
+-        return label;
+-    }
+-}
+Index: .gitignore
+===================================================================
+diff --git a/.gitignore b/.gitignore
+deleted file mode 100644
+--- a/.gitignore	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,43 +0,0 @@
+-.gradle
+-build/
+-!gradle/wrapper/gradle-wrapper.jar
+-!**/src/main/**/build/
+-!**/src/test/**/build/
+-.kotlin
+-
+-### IntelliJ IDEA ###
+-.idea/modules.xml
+-.idea/jarRepositories.xml
+-.idea/compiler.xml
+-.idea/libraries/
+-*.iws
+-*.iml
+-*.ipr
+-out/
+-!**/src/main/**/out/
+-!**/src/test/**/out/
+-
+-### Eclipse ###
+-.apt_generated
+-.classpath
+-.factorypath
+-.project
+-.settings
+-.springBeans
+-.sts4-cache
+-bin/
+-!**/src/main/**/bin/
+-!**/src/test/**/bin/
+-
+-### NetBeans ###
+-/nbproject/private/
+-/nbbuild/
+-/dist/
+-/nbdist/
+-/.nb-gradle/
+-
+-### VS Code ###
+-.vscode/
+-
+-### Mac OS ###
+-.DS_Store
+Index: src/test/java/VitalsTest.java
+===================================================================
+diff --git a/src/test/java/VitalsTest.java b/src/test/java/VitalsTest.java
+deleted file mode 100644
+--- a/src/test/java/VitalsTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,79 +0,0 @@
+-import edu.io.player.Vitals;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-public class VitalsTest {
+-
+-    private Vitals vitals;
+-    private boolean testb;
+-
+-    @BeforeEach
+-    void setUp() {
+-        vitals = new Vitals();
+-    }
+-
+-    @Test
+-    void default_hydration_is_100() {
+-        Assertions.assertEquals(100, vitals.hydration());
+-    }
+-
+-    @Test
+-    void can_dehydrate_and_hydrate() {
+-        var h = vitals.hydration();
+-        vitals.dehydrate(20);
+-        Assertions.assertEquals(h - 20, vitals.hydration());
+-        vitals.hydrate(20);
+-        Assertions.assertEquals(h, vitals.hydration());
+-    }
+-
+-    @Test
+-    void throw_if_amount_param_is_negative() {
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> vitals.hydrate(-1));
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> vitals.dehydrate(-1));
+-    }
+-
+-    @Test
+-    void min_hydration_amount_is_0() {
+-        var h = vitals.hydration();
+-        vitals.dehydrate(h);
+-        Assertions.assertEquals(0, vitals.hydration());
+-        vitals.dehydrate(h);
+-        Assertions.assertEquals(0, vitals.hydration());
+-    }
+-
+-    @Test
+-    void max_hydration_amount_is_100() {
+-        vitals.hydrate(100);
+-        Assertions.assertEquals(100, vitals.hydration());
+-        vitals.hydrate(100);
+-        Assertions.assertEquals(100, vitals.hydration());
+-    }
+-
+-    @Test
+-    void isAlive_is_true_when_hydration_is_not_0() {
+-        vitals.hydrate(10);
+-        Assertions.assertTrue(vitals.isAlive());
+-        vitals.dehydrate(100);
+-        Assertions.assertFalse(vitals.isAlive());
+-    }
+-
+-    @Test
+-    void can_set_callback_onDeath() {
+-        testb = false;
+-        vitals.setOnDeathHandler(() -> testb = true);
+-        vitals.dehydrate(vitals.hydration());
+-        Assertions.assertTrue(testb);
+-    }
+-
+-    @Test
+-    void throws_when_callback_is_null() {
+-        Assertions.assertThrows(
+-                NullPointerException.class,
+-                () -> vitals.setOnDeathHandler(null));
+-    }
+-}
+Index: src/main/java/edu/io/player/NoTool.java
+===================================================================
+diff --git a/src/main/java/edu/io/player/NoTool.java b/src/main/java/edu/io/player/NoTool.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/player/NoTool.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,40 +0,0 @@
+-package edu.io.player;
+-
+-import edu.io.token.Tool;
+-import edu.io.token.Token;
+-
+-public class NoTool implements Tool {
+-    private static final NoTool INSTANCE = new NoTool();
+-
+-    public static NoTool getInstance() {
+-        return INSTANCE;
+-    }
+-
+-    private NoTool() {}
+-
+-    @Override
+-    public Tool useWith(Token withToken) {
+-        return this;
+-    }
+-
+-    @Override
+-    public Tool ifWorking(Runnable action) {
+-        return this;
+-    }
+-
+-    @Override
+-    public Tool ifBroken(Runnable action) {
+-        return this;
+-    }
+-
+-    @Override
+-    public Tool ifIdle(Runnable action) {
+-        action.run();
+-        return this;
+-    }
+-
+-    @Override
+-    public boolean isBroken() {
+-        return false;
+-    }
+-}
+\ No newline at end of file
+Index: src/test/java/PickaxeTest.java
+===================================================================
+diff --git a/src/test/java/PickaxeTest.java b/src/test/java/PickaxeTest.java
+deleted file mode 100644
+--- a/src/test/java/PickaxeTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,115 +0,0 @@
+-import edu.io.player.Player;
+-import edu.io.token.EmptyToken;
+-import edu.io.token.GoldToken;
+-import edu.io.token.PickaxeToken;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.Test;
+-
+-public class PickaxeTest {
+-
+-    @Test
+-    void pickaxe_gain_when_player_interacts_with_gold() {
+-        var player = new Player();
+-        player.interactWithToken(new PickaxeToken());
+-        player.interactWithToken(new GoldToken(2.0));
+-        Assertions.assertEquals(2.0 * 1.5, player.gold.amount());
+-    }
+-
+-
+-    @Test
+-    void default_gainFactor_is_1_5() {
+-        Assertions.assertEquals(1.5, new PickaxeToken().gainFactor());
+-    }
+-
+-    @Test
+-    void can_create_pickaxe_with_custom_gainFactor() {
+-        Assertions.assertEquals(1.75, new PickaxeToken(1.75).gainFactor());
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> new PickaxeToken(0));
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> new PickaxeToken(-1));
+-    }
+-
+-    @Test
+-    void gainFactor_affects_collected_gold() {
+-        var player = new Player();
+-        player.interactWithToken(new PickaxeToken(1.75));
+-        player.interactWithToken(new GoldToken(2.0));
+-        Assertions.assertEquals(1.75 * 2.0, player.gold.amount());
+-    }
+-
+-    @Test
+-    void default_durability_is_3() {
+-        Assertions.assertEquals(3, new PickaxeToken().durability());
+-    }
+-
+-    @Test
+-    void can_create_pickaxe_with_custom_durability() {
+-        Assertions.assertEquals(5, new PickaxeToken(1.0, 5).durability());
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> new PickaxeToken(1.0, 0));
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> new PickaxeToken(1.0, -1));
+-    }
+-
+-    @Test
+-    void pickaxe_use_decrement_durability() {
+-        var n = 3;
+-        var t = new PickaxeToken(1.5, n);
+-        for (var i=0; i<n; i++) {
+-            Assertions.assertTrue(t.durability() > 0);
+-            t.use();
+-        }
+-        Assertions.assertEquals(0, t.durability());
+-    }
+-
+-    @Test
+-    void broken_pickaxe_is_unusable() {
+-        // Arrange
+-        var player = new Player();
+-        var goldToken = new GoldToken(2.0);
+-        var pickaxeToken = new PickaxeToken(1.5, 1);
+-        player.interactWithToken(pickaxeToken);
+-        pickaxeToken.use();
+-        // Act
+-        player.interactWithToken(goldToken);
+-        // Assert
+-        Assertions.assertTrue(pickaxeToken.isBroken());
+-        Assertions.assertEquals(2.0, player.gold.amount());
+-    }
+-
+-    @Test
+-    void can_use_pickaxe_with_gold() {
+-        new PickaxeToken().useWith(new GoldToken())
+-               .ifWorking(() -> {
+-                   Assertions.assertTrue(true);
+-               })
+-               .ifBroken(Assertions::fail)
+-               .ifIdle(Assertions::fail);
+-    }
+-
+-    @Test
+-    void can_use_pickaxe_with_other_than_gold_but_no_effect() {
+-        new PickaxeToken().useWith(new EmptyToken())
+-                .ifWorking(Assertions::fail)
+-                .ifBroken(Assertions::fail)
+-                .ifIdle(() -> {
+-                    Assertions.assertTrue(true);
+-                });
+-    }
+-
+-    @Test
+-    void broken_pickaxe_doesnt_work() {
+-        var pickaxeToken = new PickaxeToken(1.5, 1);
+-        pickaxeToken.useWith(new GoldToken()).ifWorking(()->{});
+-        pickaxeToken.useWith(new GoldToken())
+-                .ifWorking(Assertions::fail)
+-                .ifBroken(() -> {
+-                    Assertions.assertTrue(true);
+-                });
+-    }
+-}
+Index: info/test.log
+===================================================================
+diff --git a/info/test.log b/info/test.log
+deleted file mode 100644
+--- a/info/test.log	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,21 +0,0 @@
+-2025.11.19 15:07:03
+-
+-> Task :clean
+-> Task :compileJava
+-> Task :processResources NO-SOURCE
+-> Task :classes
+-> Task :compileTestJava
+-> Task :processTestResources NO-SOURCE
+-> Task :testClasses
+-> Task :test
+-
+-BUILD SUCCESSFUL in 1s
+-4 actionable tasks: 4 executedWARNING: A restricted method in java.lang.System has been called
+-WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/home/olek/.gradle/wrapper/dists/gradle-8.14-bin/38aieal9i53h9rfe7vjup95b9/gradle-8.14/lib/native-platform-0.22-milestone-28.jar)
+-WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+-WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+-[STDERR]
+-WARNING: A restricted method in java.lang.System has been called
+-WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/home/olek/.gradle/wrapper/dists/gradle-8.14-bin/38aieal9i53h9rfe7vjup95b9/gradle-8.14/lib/native-platform-0.22-milestone-28.jar)
+-WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+-WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+\ No newline at end of file
+Index: src/main/java/edu/io/token/WaterToken.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/WaterToken.java b/src/main/java/edu/io/token/WaterToken.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/WaterToken.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,21 +0,0 @@
+-package edu.io.token;
+-
+-public class WaterToken extends Token {
+-    private final int amount;
+-
+-    public WaterToken() {
+-        this(10); // Domyślna ilość *zgodnie z testami!!!!*
+-    }
+-
+-    public WaterToken(int amount) {
+-        super(Label.WATER_TOKEN_LABEL);
+-        if (amount <= 0 || amount > 100) {
+-            throw new IllegalArgumentException("Amount must be between 1 and 100");
+-        }
+-        this.amount = amount;
+-    }
+-
+-    public int amount() {
+-        return amount;
+-    }
+-}
+\ No newline at end of file
+Index: src/test/java/GoldTokenTest.java
+===================================================================
+diff --git a/src/test/java/GoldTokenTest.java b/src/test/java/GoldTokenTest.java
+deleted file mode 100644
+--- a/src/test/java/GoldTokenTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,33 +0,0 @@
+-import edu.io.token.GoldToken;
+-import edu.io.token.PyriteToken;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.Test;
+-
+-class GoldTokenTest {
+-
+-    @Test
+-    void default_gold_amount_is_one() {
+-        var t = new GoldToken();
+-        Assertions.assertEquals(1.0, t.amount());
+-    }
+-
+-    @Test
+-    void can_be_created_with_amount() {
+-        var t = new GoldToken(1.5);
+-        Assertions.assertEquals(1.5, t.amount());
+-    }
+-
+-    @Test
+-    void throws_when_amount_is_negative() {
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> new GoldToken(-1));
+-    }
+-
+-    @Test
+-    void pyrite_is_gold_with_no_value() {
+-        var t = new PyriteToken();
+-        Assertions.assertInstanceOf(GoldToken.class, t);
+-        Assertions.assertEquals(0.0, t.amount());
+-    }
+-}
+Index: src/main/java/edu/io/player/Gold.java
+===================================================================
+diff --git a/src/main/java/edu/io/player/Gold.java b/src/main/java/edu/io/player/Gold.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/player/Gold.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,35 +0,0 @@
+-package edu.io.player;
+-
+-public class Gold {
+-    private double amount = 0.0;
+-
+-    public Gold() {}
+-
+-    public Gold(double amount) {
+-        if (amount < 0) {
+-            throw new IllegalArgumentException("Amount cannot be negative");
+-        }
+-        this.amount = amount;
+-    }
+-
+-    public double amount() {
+-        return amount;
+-    }
+-
+-    public void gain(double amount) {
+-        if (amount < 0) {
+-            throw new IllegalArgumentException("Amount cannot be negative");
+-        }
+-        this.amount += amount;
+-    }
+-
+-    public void lose(double amount) {
+-        if (amount < 0) {
+-            throw new IllegalArgumentException("Amount cannot be negative");
+-        }
+-        if (amount > this.amount) {
+-            throw new IllegalArgumentException("Not enough gold");
+-        }
+-        this.amount -= amount;
+-    }
+-}
+\ No newline at end of file
+Index: src/main/java/edu/io/token/PickaxeToken.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/PickaxeToken.java b/src/main/java/edu/io/token/PickaxeToken.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/PickaxeToken.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,88 +0,0 @@
+-package edu.io.token;
+-
+-public class PickaxeToken extends Token implements Tool, Repairable {
+-    private final double gainFactor;
+-    private int durability;
+-    private final int initialDurability;
+-    private boolean wasUsedInLastOperation = false;
+-
+-    public PickaxeToken() {
+-        this(1.5, 3);
+-    }
+-
+-    public PickaxeToken(double gainFactor) {
+-        this(gainFactor, 3);
+-    }
+-
+-    public PickaxeToken(double gainFactor, int durability) {
+-        super(Label.PICKAXE_TOKEN_LABEL);
+-        if (gainFactor <= 0) {
+-            throw new IllegalArgumentException("Gain factor must be positive");
+-        }
+-        if (durability <= 0) {
+-            throw new IllegalArgumentException("Durability must be positive");
+-        }
+-        this.gainFactor = gainFactor;
+-        this.durability = durability;
+-        this.initialDurability = durability;
+-    }
+-
+-    public double gainFactor() {
+-        return gainFactor;
+-    }
+-
+-    public int durability() {
+-        return durability;
+-    }
+-
+-    public void use() {
+-        if (durability > 0) {
+-            durability--;
+-        }
+-    }
+-
+-    @Override
+-    public void repair() {
+-        durability = initialDurability;
+-    }
+-
+-    @Override
+-    public boolean isBroken() {
+-        return durability <= 0;
+-    }
+-
+-    @Override
+-    public Tool useWith(Token withToken) {
+-        wasUsedInLastOperation = false;
+-
+-        if (withToken instanceof GoldToken && !isBroken()) {
+-            use();
+-            wasUsedInLastOperation = true;
+-        }
+-        return this;
+-    }
+-
+-    @Override
+-    public Tool ifWorking(Runnable action) {
+-        if (wasUsedInLastOperation && !isBroken()) {
+-            action.run();
+-        }
+-        return this;
+-    }
+-
+-    @Override
+-    public Tool ifBroken(Runnable action) {
+-        if (isBroken()) {
+-            action.run();
+-        }
+-        return this;
+-    }
+-
+-    @Override
+-    public Tool ifIdle(Runnable action) {
+-        if (!wasUsedInLastOperation && !isBroken()) {
+-            action.run();
+-        }
+-        return this;
+-    }
+-}
+\ No newline at end of file
+Index: src/test/java/TokenTest.java
+===================================================================
+diff --git a/src/test/java/TokenTest.java b/src/test/java/TokenTest.java
+deleted file mode 100644
+--- a/src/test/java/TokenTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,45 +0,0 @@
+-import edu.io.Board;
+-import edu.io.player.Player;
+-import edu.io.token.*;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.Test;
+-import java.lang.reflect.Modifier;
+-
+-class TokenTest {
+-    @Test
+-    void token_has_label() {
+-        Token token = new EmptyToken();
+-        Assertions.assertEquals(Label.EMPTY_TOKEN_LABEL, token.label());
+-    }
+-
+-    @Test
+-    void token_has_only_one_ctor() {
+-        Assertions.assertEquals(1, Token.class.getConstructors().length);
+-    }
+-
+-    @Test
+-    void test_EmptyToken_label() {
+-        Assertions.assertEquals(
+-                Label.EMPTY_TOKEN_LABEL,
+-                new EmptyToken().label());
+-    }
+-
+-    @Test
+-    void test_GoldToken_label() {
+-        Assertions.assertEquals(
+-                Label.GOLD_TOKEN_LABEL,
+-                new GoldToken().label());
+-    }
+-
+-    @Test
+-    void test_PlayerToken_label() {
+-        Assertions.assertEquals(
+-                Label.PLAYER_TOKEN_LABEL,
+-                new PlayerToken(new Player(), new Board()).label());
+-    }
+-
+-    @Test
+-    void class_Token_is_abstract() {
+-        Assertions.assertTrue(Modifier.isAbstract(Token.class.getModifiers()));
+-    }
+-}
+Index: src/test/java/PlayerTest.java
+===================================================================
+diff --git a/src/test/java/PlayerTest.java b/src/test/java/PlayerTest.java
+deleted file mode 100644
+--- a/src/test/java/PlayerTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,102 +0,0 @@
+-import edu.io.Board;
+-import edu.io.player.Player;
+-import edu.io.player.VitalsValues;
+-import edu.io.token.*;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-class PlayerTest {
+-    Board  board;
+-    Player player;
+-
+-    @BeforeEach
+-    void setUp() {
+-        board = new Board();
+-        player = new Player();
+-    }
+-
+-    @Test
+-    void can_assign_token_to_player() {
+-        PlayerToken token = new PlayerToken(player, board);
+-        player.assignToken(token);
+-        Assertions.assertEquals(token, player.token());
+-    }
+-
+-    @Test
+-    void player_can_interact_with_gold() {
+-        var goldToken = new GoldToken(2.0);
+-        var gold = player.gold.amount();
+-        player.interactWithToken(goldToken);
+-        Assertions.assertEquals(gold + 2.0, player.gold.amount());
+-    }
+-
+-    @Test
+-    void player_init_hydration_is_100() {
+-        Assertions.assertEquals(100, player.vitals.hydration());
+-    }
+-
+-    @Test
+-    void move_dehydrates() {
+-        var h = player.vitals.hydration();
+-        player.interactWithToken(new EmptyToken());
+-        Assertions.assertEquals(
+-                h - VitalsValues.DEHYDRATION_MOVE,
+-                player.vitals.hydration());
+-    }
+-
+-    @Test
+-    void collecting_gold_dehydrates() {
+-        var h = player.vitals.hydration();
+-        player.interactWithToken(new GoldToken());
+-        Assertions.assertEquals(
+-                h - VitalsValues.DEHYDRATION_GOLD,
+-                player.vitals.hydration());
+-        h = player.vitals.hydration();
+-        player.interactWithToken(new PyriteToken());
+-        Assertions.assertEquals(
+-                h - VitalsValues.DEHYDRATION_GOLD,
+-                player.vitals.hydration());
+-    }
+-
+-    @Test
+-    void repairing_with_anvil_dehydrates() {
+-        var h = player.vitals.hydration();
+-        player.interactWithToken(new PickaxeToken());
+-        player.interactWithToken(new AnvilToken());
+-        Assertions.assertEquals(
+-                h - VitalsValues.DEHYDRATION_ANVIL,
+-                player.vitals.hydration());
+-    }
+-
+-    @Test
+-    void interactWithToken_throws_when_player_is_dead() {
+-        player.vitals.dehydrate(player.vitals.hydration());
+-        Assertions.assertThrows(
+-                IllegalStateException.class,
+-                () -> player.interactWithToken(new EmptyToken()));
+-    }
+-
+-    @Test
+-    void water_token_gain_hydration() {
+-        player.vitals.hydrate(100);
+-        player.vitals.dehydrate(30);
+-        player.interactWithToken(new WaterToken(20));
+-        Assertions.assertEquals(100-30+20, player.vitals.hydration());
+-    }
+-
+-    @Test
+-    void throws_on_null_in_assignToken() {
+-        Assertions.assertThrows(
+-                NullPointerException.class,
+-                () -> player.assignToken(null));
+-    }
+-
+-    @Test
+-    void throws_on_null_in_interactWithToken() {
+-        Assertions.assertThrows(
+-                NullPointerException.class,
+-                () -> player.interactWithToken(null));
+-    }
+-
+-}
+Index: src/test/java/GoldTest.java
+===================================================================
+diff --git a/src/test/java/GoldTest.java b/src/test/java/GoldTest.java
+deleted file mode 100644
+--- a/src/test/java/GoldTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,65 +0,0 @@
+-import edu.io.player.Gold;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-public class GoldTest {
+-
+-    private Gold gold;
+-
+-    @BeforeEach
+-    void setUp() {
+-        this.gold = new Gold();
+-    }
+-
+-    @Test
+-    void default_amount_is_0() {
+-        Assertions.assertEquals(0.0, gold.amount());
+-    }
+-
+-    @Test
+-    void can_init_gold_with_amount() {
+-        var gold = new Gold(3.0);
+-        Assertions.assertEquals(3.0, gold.amount());
+-    }
+-
+-    @Test
+-    void throws_when_creating_gold_with_neg_amount() {
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> { new Gold(-1.0); });
+-    }
+-
+-    @Test
+-    void player_can_gain_gold() {
+-        var a = gold.amount();
+-        gold.gain(1.0);
+-        Assertions.assertEquals(a + 1.0, gold.amount());
+-    }
+-
+-    @Test
+-    void player_can_lose_gold() {
+-        gold.gain(2.0);
+-        var a = gold.amount();
+-        gold.lose(1.0);
+-        Assertions.assertEquals(a - 1.0, gold.amount());
+-    }
+-
+-    @Test
+-    void gold_cannot_go_below_zero() {
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> gold.lose(1.0));
+-        Assertions.assertEquals(0.0, gold.amount());
+-    }
+-
+-    @Test
+-    void gain_and_lose_amount_cannot_be_negative() {
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> gold.gain(-1.0));
+-        Assertions.assertThrows(
+-                IllegalArgumentException.class,
+-                () -> gold.lose(-1.0));
+-    }
+-}
+Index: src/test/java/GameTest.java
+===================================================================
+diff --git a/src/test/java/GameTest.java b/src/test/java/GameTest.java
+deleted file mode 100644
+--- a/src/test/java/GameTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,65 +0,0 @@
+-import edu.io.Board;
+-import edu.io.Game;
+-import edu.io.player.Player;
+-import edu.io.token.PlayerToken;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-import java.lang.reflect.Field;
+-
+-class GameTest {
+-
+-    Game game;
+-    Player player;
+-
+-    @BeforeEach
+-    void setUp() {
+-        game = new Game();
+-        player = new Player();
+-    }
+-
+-    @Test
+-    void player_join_game_and_get_token() {
+-        game.join(player);
+-        Assertions.assertInstanceOf(PlayerToken.class, player.token());
+-    }
+-
+-    @Test
+-    void new_player_token_is_on_the_board() {
+-        game.join(player);
+-        try {
+-            // Find the field in the Game class that holds the board.
+-            // Never do this in real-life tests!
+-            // This is for educational purposes only.
+-            Field[] fields = Game.class.getDeclaredFields();
+-            for (Field field : fields) {
+-                if (field.getType().equals(Board.class)) {
+-                    field.setAccessible(true);
+-                    Board board = (Board) field.get(game);
+-                    PlayerToken token = player.token();
+-                    Assertions.assertEquals(
+-                            token,
+-                            board.peekToken(
+-                                    token.pos().col(),
+-                                    token.pos().row()));
+-                }
+-            }
+-        }
+-        catch (Exception e) {
+-            Assertions.fail();
+-        }
+-    }
+-
+-    @Test
+-    void has_method_start() {
+-        Assertions.assertDoesNotThrow(() -> Game.class.getMethod("start"));
+-    }
+-
+-    @Test
+-    void throws_when_join_null() {
+-        Assertions.assertThrows(
+-                NullPointerException.class,
+-                () -> game.join(null));
+-    }
+-}
+Index: src/main/java/edu/io/token/Label.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/Label.java b/src/main/java/edu/io/token/Label.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/Label.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,10 +0,0 @@
+-package edu.io.token;
+-
+-public class Label {
+-    public static final String EMPTY_TOKEN_LABEL = "・";
+-    public static final String PLAYER_TOKEN_LABEL = "웃";
+-    public static final String GOLD_TOKEN_LABEL = "\uD83D\uDCB0";
+-    public static final String PICKAXE_TOKEN_LABEL = "⛏";
+-    public static final String ANVIL_TOKEN_LABEL = "π";
+-    public static final String WATER_TOKEN_LABEL = "*";
+-}
+Index: src/test/java/PlayerTokenTest.java
+===================================================================
+diff --git a/src/test/java/PlayerTokenTest.java b/src/test/java/PlayerTokenTest.java
+deleted file mode 100644
+--- a/src/test/java/PlayerTokenTest.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,101 +0,0 @@
+-import edu.io.Board;
+-import edu.io.player.Player;
+-import edu.io.token.EmptyToken;
+-import edu.io.token.PlayerToken;
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-
+-class PlayerTokenTest {
+-    Board board;
+-    PlayerToken playerToken;
+-    Player player;
+-
+-    @BeforeEach
+-    void setUp() {
+-        board = new Board();
+-        player = new Player();
+-        playerToken = new PlayerToken(player, board);
+-    }
+-
+-    @Test
+-    void new_PlayerToken_is_placed_on_the_board() {
+-        Board.Coords pos = playerToken.pos();
+-        Assertions.assertEquals(playerToken, board.peekToken(pos.col(), pos.row()));
+-    }
+-
+-    @Test
+-    void stay_inside_and_throws_when_go_too_far_left() {
+-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+-            while (true) playerToken.move(PlayerToken.Move.LEFT);
+-        });
+-        Board.Coords pos = playerToken.pos();
+-        Assertions.assertEquals(0, pos.col());
+-    }
+-    @Test
+-    void stay_inside_and_throws_when_go_too_far_right() {
+-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+-            while (true) playerToken.move(PlayerToken.Move.RIGHT);
+-        });
+-        Board.Coords pos = playerToken.pos();
+-        Assertions.assertEquals(board.size()-1, pos.col());
+-    }
+-    @Test
+-    void stay_inside_throws_when_go_too_far_up() {
+-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+-            while (true) playerToken.move(PlayerToken.Move.UP);
+-        });
+-        Board.Coords pos = playerToken.pos();
+-        Assertions.assertEquals(0, pos.row());
+-    }
+-    @Test
+-    void stay_inside_throws_when_go_too_far_down() {
+-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+-            while (true) playerToken.move(PlayerToken.Move.DOWN);
+-        });
+-        Board.Coords pos = playerToken.pos();
+-        Assertions.assertEquals(board.size()-1, pos.row());
+-    }
+-
+-    @Test
+-    void move_moves_token() {
+-        Board.Coords pos = playerToken.pos();
+-        try {
+-            playerToken.move(PlayerToken.Move.DOWN);
+-            Assertions.assertEquals(
+-                    playerToken,
+-                    board.peekToken(pos.col(), pos.row() + 1));
+-        }
+-        catch (IllegalArgumentException e) {
+-            playerToken.move(PlayerToken.Move.UP);
+-            Assertions.assertEquals(
+-                    playerToken,
+-                    board.peekToken(pos.col(), pos.row() - 1));
+-        }
+-    }
+-
+-    @Test
+-    void after_move_prev_square_is_empty() {
+-        Board.Coords pos = playerToken.pos();
+-        playerToken.move(PlayerToken.Move.RIGHT);
+-        Assertions.assertInstanceOf(
+-                EmptyToken.class,
+-                board.peekToken(pos.col(), pos.row()));
+-    }
+-
+-    @Test
+-    void throws_on_null_in_ctor() {
+-        Assertions.assertThrows(
+-                NullPointerException.class,
+-                () -> {new PlayerToken(null, board);});
+-        Assertions.assertThrows(
+-                NullPointerException.class,
+-                () -> {new PlayerToken(player, null);});
+-    }
+-
+-    @Test
+-    void throws_on_null_in_move() {
+-        Assertions.assertThrows(NullPointerException.class,
+-                () -> playerToken.move(null));
+-    }
+-}
+Index: src/main/java/edu/io/token/AnvilToken.java
+===================================================================
+diff --git a/src/main/java/edu/io/token/AnvilToken.java b/src/main/java/edu/io/token/AnvilToken.java
+deleted file mode 100644
+--- a/src/main/java/edu/io/token/AnvilToken.java	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ /dev/null	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
+@@ -1,7 +0,0 @@
+-package edu.io.token;
+-
+-public class AnvilToken extends Token {
+-    public AnvilToken() {
+-        super(Label.ANVIL_TOKEN_LABEL);
+-    }
+-}
+\ No newline at end of file
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#Sat Sep 20 21:34:50 CEST 2025\r\ndistributionBase=GRADLE_USER_HOME\r\ndistributionPath=wrapper/dists\r\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.14-bin.zip\r\nzipStoreBase=GRADLE_USER_HOME\r\nzipStorePath=wrapper/dists\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+--- a/gradle/wrapper/gradle-wrapper.properties	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ b/gradle/wrapper/gradle-wrapper.properties	(date 1765293190553)
+@@ -1,4 +1,4 @@
+-#Sat Sep 20 21:34:50 CEST 2025
++#Wed Nov 19 15:20:12 CET 2025
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ distributionUrl=https\://services.gradle.org/distributions/gradle-8.14-bin.zip
+Index: settings.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>rootProject.name = \"gold_rush\"
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+--- a/settings.gradle.kts	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ b/settings.gradle.kts	(date 1765293190565)
+@@ -1,1 +1,1 @@
+-rootProject.name = "gold_rush"
+\ No newline at end of file
++rootProject.name = "gold_rush_client"
+\ No newline at end of file
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    id(\"java\")\r\n}\r\n\r\ngroup = \"edu.io\"\r\nversion = \"1.0-SNAPSHOT\"\r\n\r\nrepositories {\r\n    mavenCentral()\r\n}\r\n\r\ndependencies {\r\n    testImplementation(platform(\"org.junit:junit-bom:5.10.0\"))\r\n    testImplementation(\"org.junit.jupiter:junit-jupiter\")\r\n    implementation(\"org.jetbrains:annotations:24.0.1\") // Dodana zależność\r\n}\r\n\r\ntasks.test {\r\n    useJUnitPlatform()\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ b/build.gradle.kts	(date 1765293190515)
+@@ -2,7 +2,7 @@
+     id("java")
+ }
+ 
+-group = "edu.io"
++group = "edu.io.net"
+ version = "1.0-SNAPSHOT"
+ 
+ repositories {
+@@ -10,9 +10,11 @@
+ }
+ 
+ dependencies {
++    implementation(fileTree("libs"))
++
+     testImplementation(platform("org.junit:junit-bom:5.10.0"))
+     testImplementation("org.junit.jupiter:junit-jupiter")
+-    implementation("org.jetbrains:annotations:24.0.1") // Dodana zależność
++    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+ }
+ 
+ tasks.test {
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"FrameworkDetectionExcludesConfiguration\">\r\n    <file type=\"web\" url=\"file://$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_23\" default=\"true\" project-jdk-name=\"openjdk-23\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/out\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision d646731dfc2c119d59383aa6a4586e0625d117fa)
++++ b/.idea/misc.xml	(date 1765293271346)
+@@ -1,10 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ExternalStorageConfigurationManager" enabled="true" />
+-  <component name="FrameworkDetectionExcludesConfiguration">
+-    <file type="web" url="file://$PROJECT_DIR$" />
+-  </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_23" default="true" project-jdk-name="openjdk-23" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" default="true">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
