@@ -12,5 +12,6 @@
     <orderEntry type="library" name="libs" level="project" />
     <orderEntry type="library" name="game_server-1.1.19-all" level="project" />
     <orderEntry type="library" name="gradle-wrapper" level="project" />
+    <orderEntry type="library" name="game_server-1.2.6-all" level="project" />
   </component>
 </module>

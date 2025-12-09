@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="game_server-1.2.6-all">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/game_server-1.2.6-all.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
