@@ -1,1 +1,1 @@
-rootProject.name = "gold_rush"
+rootProject.name = "gold_rush_client"
