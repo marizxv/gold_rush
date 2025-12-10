@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="WaterTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-11-18T19:14:31.428Z" hostname="MARI-WIN-NOTE" time="0.017">
-  <properties/>
-  <testcase name="amount_can_be_in_range_0_100()" classname="WaterTest" time="0.015"/>
-  <testcase name="default_water_token_amount_is_10()" classname="WaterTest" time="0.001"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
