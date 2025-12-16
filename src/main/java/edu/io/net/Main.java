@@ -12,7 +12,7 @@ public class Main {
     private static String clientId;
     private static String playerName;
     private static int boardSize = 0;
-    private static char[][] boardGrid;
+    private static String[][] boardGrid;
     private static boolean gameRunning = true;
 
     public static void main(String[] args) throws InterruptedException {
@@ -186,13 +186,19 @@ public class Main {
         switch (state) {
             case GameState.BoardInfo board -> {
                 boardSize = board.size();
-                boardGrid = new char[boardSize][boardSize];
+                boardGrid = new String[boardSize][boardSize];
+                // Inicjalizuj wszystkie komórki jako puste, już jako str
+                for (int i = 0; i < boardSize; i++) {
+                    for (int j = 0; j < boardSize; j++) {
+                        boardGrid[i][j] = "·";
+                    }
+                }
                 System.out.println("Plansza: " + boardSize + "x" + boardSize);
             }
             case GameState.BoardSquareInfo square -> {
                 int col = square.pos().col();
                 int row = square.pos().row();
-                char label = square.label();
+                String label = square.label();
                 if (col >= 0 && col < boardSize && row >= 0 && row < boardSize) {
                     boardGrid[row][col] = label;
                 }
@@ -226,8 +232,13 @@ public class Main {
         System.out.println("\n=== PLANSZA " + boardSize + "x" + boardSize + " ===");
         for (int row = 0; row < boardSize; row++) {
             for (int col = 0; col < boardSize; col++) {
-                char cell = boardGrid[row][col];
-                System.out.print(cell == 0 ? "· " : cell + " ");
+                String cell = boardGrid[row][col];
+                // Jeśli komórka jest pusta, wyświetl kropkę
+                if (cell == null || cell.isEmpty()) {
+                    System.out.print("· ");
+                } else {
+                    System.out.print(cell + " ");
+                }
             }
             System.out.println();
         }

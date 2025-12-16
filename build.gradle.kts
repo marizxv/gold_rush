@@ -1,6 +1,7 @@
 plugins {
-    id("java")
-    id("application")
+    java
+    application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "edu.io.net"
@@ -11,7 +12,8 @@ repositories {
 }
 
 dependencies {
-    implementation(fileTree("libs"))
+    implementation(files("libs/game_common-1.2.10.jar"))
+    implementation(files("libs/game_connector_lib-1.2.10.jar"))
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
